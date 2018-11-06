@@ -5,7 +5,6 @@
 using namespace std;
 
     void Network::resize(const size_t& n){
-		//links.clear();
 		values.resize(n);
 		RNG.normal(values,0,1);} // Rempli le tableau de valeurs aleatoires suivant la loi normal
     
@@ -47,8 +46,6 @@ using namespace std;
     size_t Network::set_values(const std::vector<double>& newvalues){
 		
 		size_t size_to_add(std::min(newvalues.size(), size()));
-		//values.clear();
-		//links.clear();
 		
 		for(size_t i(0); i < size_to_add; ++i){
 			values[i] = newvalues[i];
