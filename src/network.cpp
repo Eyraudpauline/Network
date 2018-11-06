@@ -1,23 +1,22 @@
 #include "network.h"
 #include "random.h"
-#include <algorithm>
+#include "iostream"
 
 using namespace std;
 
     void Network::resize(const size_t& n){
-		links.clear();
+		//links.clear();
 		values.resize(n);
-		RandomNumbers aleatoires;
-		aleatoires.normal(values);} // Rempli le tableau de valeurs aleatoires suivant la loi normal
+		RNG.normal(values,0,1);} // Rempli le tableau de valeurs aleatoires suivant la loi normal
     
 
     bool Network::add_link(const size_t& indiceA, const size_t& indiceB){
 		//A ne peut pas faire de lien avec lui meme / que les valeurs A et B soient dans values et que le lien n'existe pas deja
 		if (indiceA==indiceB) {return false;}
-		else if (indiceA>=values.size() or indiceB>=values.size()){return false;}//PK>=
+		else if (indiceA>=values.size() or indiceB>=values.size()){return false;}
 		
-		auto range=links.equal_range(indiceA); // je cherche tous les liens commencant par A
-		for(auto i=range.first;i!=range.second;++i){  //je parcours tous les liens commencant par A
+		auto range=links.equal_range(indiceA); 
+		for(auto i=range.first;i!=range.second;++i){  
 		if(i->second==indiceB){return true;}
 		
 		}
@@ -28,40 +27,33 @@ using namespace std;
 	}
 
 
-    size_t Network::random_connect(const double& mean_deg){ //TYPE DE retour correspond à quoi ?????
-		
-		links.clear();
-		size_t nblienstot(0);
-		
-		
-		for (unsigned int i(0);i<values.size();++i){
-		size_t nbliens(RNG.poisson(mean_deg));
-		
-		while(nbliens>=values.size()){nbliens= RNG.poisson(mean_deg);} //Pour ne pas avoir plus de liens que de nombres 
-			
-		vector<int> indices(nbliens);//tableau de la taille nb de lien
-		RNG.uniform_int(indices,0,values.size());//rempli le tableau en lui donnant des nb aleatoires
-		
-		for(auto j: indices){	
-		if(!add_link(j,i)){add_link(j,i+1);}
-		else{add_link(j,i);}
-		}
-		
-		nblienstot+=nbliens;	
-		}
-	return nblienstot;
-	} 
-	
+   size_t Network::random_connect(const double& mean_deg){
+	 links.clear();
+	  
+	 for(size_t i(0); i<size() ; ++i){                                         
+	int nb_liensouhaites(RNG.poisson(mean_deg)); 
+    while(nb_liensouhaites>=size()-1){ nb_liensouhaites=RNG.poisson(mean_deg);}
 
+	int nbeffectif(0);  
+	                       
+	while(nbeffectif<nb_liensouhaites){   
+	int indice=RNG.uniform_double(0, size()-1);       
+	if(add_link(i, indice)){++nbeffectif;}
+	}		 
+	}
+	return links.size()/2;
+ }
 
     size_t Network::set_values(const std::vector<double>& newvalues){
 		
-		values.clear();
-		links.clear();//Averifier!!
-		for(auto i: newvalues){
-			values.push_back(i);
+		size_t size_to_add(std::min(newvalues.size(), size()));
+		//values.clear();
+		//links.clear();
+		
+		for(size_t i(0); i < size_to_add; ++i){
+			values[i] = newvalues[i];
 		}
-		return (values.size());	
+		return size_to_add;	
 	}
 	
     size_t Network::size() const{
